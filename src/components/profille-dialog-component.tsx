@@ -3,7 +3,7 @@ import { useTheme } from 'next-themes';
 import React, { useState } from 'react'
 import { Card, CardTitle } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Handshake, LaptopMinimal, Pencil, Sun, SunMoon, UserRound, UserRoundSearch } from 'lucide-react';
+import { Handshake, LaptopMinimal, Loader2, Pencil, Sun, SunMoon, UserRound, UserRoundSearch } from 'lucide-react';
 import { z } from 'zod';
 import { Input } from './ui/input';
 import { Separator } from './ui/separator';
@@ -20,6 +20,9 @@ import { UserButton, useUser } from '@clerk/clerk-react';
 import { useMutationHandler } from '@/hooks/use-mutation-handler';
 import { toast } from 'sonner';
 import { ConvexError } from 'convex/values';
+import { Badge } from './ui/badge';
+import { ScrollArea } from './ui/scroll-area';
+import FriendRequestCard from './friend-request-card';
 
 
 const statuses = [
@@ -37,19 +40,33 @@ const addFriendFormSchema = z.object({
 const ProfileDialogContent = () => {
 
     const [updateStatusDialog, setUpdateStatusDialog] = useState(false);
+    const [friendRequestModel, setFriendRequestModel] = useState(false);
     const [status, setStatus] = useState("");
     const { setTheme } = useTheme();
     const { user } = useUser();
     const userDetails = useQuery(api.status.get, { clerkId: user?.id! })
     const { state: updateStatusState, mutate: updateStatus } = useMutationHandler(api.status.update);
+    const { mutate: createFriendRequest, state: createFriendRequestState } = useMutationHandler(api.friend_request.create);
+    const friendRequests = useQuery(api.friend_requests.get);
     const form = useForm<z.infer<typeof addFriendFormSchema>>({
         resolver: zodResolver(addFriendFormSchema),
         defaultValues: {
             email: '',
         }
     })
-    async function onSubmit({ email }: z.infer<typeof addFriendFormSchema>) {
-        console.log(email);
+    async function FriendRequestHandler({ email }: z.infer<typeof addFriendFormSchema>) {
+        try {
+            await createFriendRequest({ email });
+            form.reset();
+            toast.success("Friend request sent successfully");
+            setFriendRequestModel(false);
+        } catch (error) {
+            toast.error(
+                error instanceof ConvexError ? error.data : "An error occurred while sending friend request"
+            )
+            console.log("Error sending friend request", error);
+            setFriendRequestModel(false);
+        }
     }
 
     async function upadteStatusHandler() {
@@ -98,7 +115,7 @@ const ProfileDialogContent = () => {
                 </div>
                 <Separator />
 
-                <Dialog>
+                <Dialog open={friendRequestModel} onOpenChange={() => setFriendRequestModel(!friendRequestModel)}>
                     <DialogTrigger>
                         <div className='flex items-center space-x-2'>
                             <UserRoundSearch />
@@ -109,20 +126,20 @@ const ProfileDialogContent = () => {
                     </DialogTrigger>
                     <DialogContent>
                         <Form {...form}>
-                            <form className='space-y-8' onSubmit={form.handleSubmit(onSubmit)}>
+                            <form className='space-y-8' onSubmit={form.handleSubmit(FriendRequestHandler)}>
                                 <FormField control={form.control} name='email' render={({ field }) => <FormItem>
                                     <FormLabel>
                                         Email
                                     </FormLabel>
                                     <FormControl>
-                                        <Input disabled={true} placeholder='friend@email.com' {...field} />
+                                        <Input disabled={createFriendRequestState === "loading"} placeholder='friend@email.com' {...field} />
                                     </FormControl>
                                     <FormDescription>
                                         Enter your friend's email to send a friend request.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>} />
-                                <Button disabled={true} type="submit">
+                                <Button disabled={createFriendRequestState === "loading"} type="submit">
                                     Submit
                                 </Button>
                             </form>
@@ -136,12 +153,30 @@ const ProfileDialogContent = () => {
                         <div className='flex items-center space-x-2'>
                             <Handshake />
                             <p>View friend requests</p>
+                            {friendRequests && friendRequests.length > 0 && (
+                                <Badge variant="outline">
+                                    {friendRequests.length}
+                                </Badge>
+                            )}
                         </div>
                     </DialogTrigger>
                     <DialogContent>
-                        <p className='text-xl text-center font-bold'>
-                            No friend request yet
-                        </p>
+                        {friendRequests ? (
+                            friendRequests.length === 0
+                        ) ? (
+                            <p className='text-xl text-center font-bold'>
+                                No friend request yet
+                            </p>
+                        ) : (
+                            <ScrollArea className='h-[400px] rounded-md'>
+                                {friendRequests.map(request => (
+                                    <FriendRequestCard
+                                        key={request.sender._id} username={request.sender.username} imageUrl={request.sender.imageUrl} id={request._id} email={request.sender.email} />
+                                ))}
+                            </ScrollArea>
+                        ) : (
+                            <Loader2 />
+                        )}
                     </DialogContent>
                 </Dialog>
                 <Separator />
