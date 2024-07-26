@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import ConvexClientProvider from "@/providers/convex-client-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,17 +21,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThemeProvider attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange>
-          <TooltipProvider>
-            <main>
-              {children}
-            </main>
-          </TooltipProvider>
-          <Toaster richColors />
-        </ThemeProvider>
+        <ConvexClientProvider>
+          <ThemeProvider attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange>
+            <TooltipProvider>
+              <main>
+                {children}
+              </main>
+            </TooltipProvider>
+            <Toaster richColors />
+          </ThemeProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   );
