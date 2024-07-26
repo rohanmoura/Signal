@@ -14,6 +14,12 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { UserButton, useUser } from '@clerk/clerk-react';
+import { useMutationHandler } from '@/hooks/use-mutation-handler';
+import { toast } from 'sonner';
+import { ConvexError } from 'convex/values';
 
 
 const statuses = [
@@ -33,6 +39,9 @@ const ProfileDialogContent = () => {
     const [updateStatusDialog, setUpdateStatusDialog] = useState(false);
     const [status, setStatus] = useState("");
     const { setTheme } = useTheme();
+    const { user } = useUser();
+    const userDetails = useQuery(api.status.get, { clerkId: user?.id! })
+    const { state: updateStatusState, mutate: updateStatus } = useMutationHandler(api.status.update);
     const form = useForm<z.infer<typeof addFriendFormSchema>>({
         resolver: zodResolver(addFriendFormSchema),
         defaultValues: {
@@ -43,6 +52,20 @@ const ProfileDialogContent = () => {
         console.log(email);
     }
 
+    async function upadteStatusHandler() {
+        try {
+            await updateStatus({ clerkId: user?.id, status });
+            toast.success("Status updated successfully");
+            setStatus("");
+            setUpdateStatusDialog(false);
+        } catch (error) {
+            toast.error(
+                error instanceof ConvexError ? error.data : "An error occurred while updating status"
+            )
+            console.log("Error updating status");
+        }
+    }
+
     return (
         <div>
             <Card className='border-0 flex  flex-col space-y-4'>
@@ -51,8 +74,8 @@ const ProfileDialogContent = () => {
                 </CardTitle>
                 <div>
                     <Avatar className='h-20 w-20 mx-auto'>
-                        <AvatarImage src='https://github.com/shadcn.png' />
-                        <AvatarFallback>User</AvatarFallback>
+                        <AvatarImage src={userDetails?.imageUrl} />
+                        <AvatarFallback>{userDetails?.username[0]}</AvatarFallback>
                     </Avatar>
                 </div>
             </Card>
@@ -60,14 +83,18 @@ const ProfileDialogContent = () => {
             <div className='flex flex-col gap-y-6'>
                 <div className='flex items-center space-x-2'>
                     <UserRound />
-                    <Input placeholder='Name' value={"User Name"} disabled className='border-none outline-none ring-0' />
+                    <Input placeholder='Name' value={userDetails?.username} disabled className='border-none outline-none ring-0' />
                 </div>
                 <Separator />
                 <div className='flex items-center justify-center space-x-5'>
                     <p>Manage your account</p>
-                    <button>
-                        User Button
-                    </button>
+                    <UserButton appearance={{
+                        elements: {
+                            userButtonPopoverCard: {
+                                pointerEvents: "initial"
+                            }
+                        }
+                    }} />
                 </div>
                 <Separator />
 
@@ -123,11 +150,11 @@ const ProfileDialogContent = () => {
                     <DialogTrigger>
                         <div className='flex items-center space-x-2'>
                             <Pencil />
-                            <p>Display current status</p>
+                            <p>{userDetails?.status}</p>
                         </div>
                     </DialogTrigger>
                     <DialogContent>
-                        <Textarea placeholder='Display Current Status' className='resize-none h-48' value={status} onChange={(e) => setStatus(e.target.value)} />
+                        <Textarea placeholder={userDetails?.status} className='resize-none h-48' value={status} onChange={(e) => setStatus(e.target.value)} disabled={updateStatusState === "loading"} />
                         <div>
                             {statuses.map((status) => (
                                 <p key={status} className='px-2 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer' onClick={() => setStatus(status)}>
@@ -135,7 +162,7 @@ const ProfileDialogContent = () => {
                                 </p>
                             ))}
                         </div>
-                        <Button className='ml-auto w-fit bg-primary-main' disabled type='button'>
+                        <Button onClick={upadteStatusHandler} className='ml-auto w-fit bg-primary-main' disabled={updateStatusState === "loading"} type='button'>
                             Update status
                         </Button>
                     </DialogContent>
