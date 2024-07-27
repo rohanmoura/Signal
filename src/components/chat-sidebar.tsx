@@ -1,7 +1,7 @@
 import React from 'react'
 import SidebarContainer from './sidebar-container'
 import { ChatList } from './chat-list'
-import NewGroup from './new-group'
+import { NewGroup } from './new-group'
 
 const ChatSidebar = () => {
   return (

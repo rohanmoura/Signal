@@ -1,39 +1,39 @@
-"use client";
+'use client';
 
-import { MessageCircle, PhoneIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { ReactNode, useMemo } from "react";
-import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "./ui/navigation-menu";
-import { cn, isRouteActivePath } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
-import Link from "next/link";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import ProfileDialogContent from "./profille-dialog-component";
+import { MessageCircle, Phone } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { FC, ReactNode, useMemo } from 'react';
+import Link from 'next/link';
 
+import {
+    NavigationMenu,
+    NavigationMenuItem,
+    NavigationMenuList,
+} from '@/components/ui/navigation-menu';
+import { cn, isRouteActivePath } from '@/lib/utils';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import ProfileDialogContent from './profille-dialog-component';
 
-type props = {
+type NavigationBarProps = {
     trigger: ReactNode;
-}
+};
 
-export const NavigationBar = ({
-    trigger,
-}: props) => {
-
+export const NavigationBar: FC<NavigationBarProps> = ({ trigger }) => {
     const pathname = usePathname();
 
-    const menuItems = useMemo(() => [
-        {
-            icon: MessageCircle,
-            label: 'Chat',
-            path: '/chats'
-        },
-        {
-            icon: PhoneIcon,
-            label: 'Call',
-            path: '/calls'
-        }
-    ], [])
+    const menuItems = useMemo(
+        () => [
+            { icon: MessageCircle, label: 'Chat', path: '/chats' },
+            { icon: Phone, label: 'Call', path: '/calls' },
+        ],
+        []
+    );
 
     return (
         <>
@@ -90,31 +90,31 @@ export const NavigationBar = ({
                         </NavigationMenu>
                     </Dialog>
                 </div>
+            </div>
 
-                <div className='md:hidden fixed flex justify-between items-center w-svw top-0 left-0 h-20 z-10 px-5 bg-white dark:bg-slate-950'>
-                    <NavigationMenu orientation='horizontal'>
-                        <NavigationMenuList>
-                            <NavigationMenuItem>
-                                <Dialog>
-                                    <NavigationMenu orientation="vertical">
-                                        <DialogTrigger>
-                                            <Avatar>
-                                                <AvatarImage src="https://github.com/shadcn.png" />
-                                                <AvatarFallback className="text-white">
-                                                    User
-                                                </AvatarFallback>
-                                            </Avatar>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <ProfileDialogContent />
-                                        </DialogContent>
-                                    </NavigationMenu>
-                                </Dialog>
-                            </NavigationMenuItem>
-                        </NavigationMenuList>
-                    </NavigationMenu>
-                </div>
+            <div className='md:hidden fixed flex justify-between items-center w-svw top-0 left-0 h-20 z-10 px-5 bg-white dark:bg-slate-950'>
+                <NavigationMenu orientation='horizontal'>
+                    <NavigationMenuList>
+                        <NavigationMenuItem>
+                            <Dialog>
+                                <NavigationMenu orientation='vertical'>
+                                    <DialogTrigger>
+                                        <Avatar>
+                                            <AvatarImage src='https://github.com/shadcn.png' />
+                                            <AvatarFallback>User</AvatarFallback>
+                                        </Avatar>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <ProfileDialogContent />
+                                    </DialogContent>
+                                </NavigationMenu>
+                            </Dialog>
+                        </NavigationMenuItem>
+                    </NavigationMenuList>
+                </NavigationMenu>
+
+                {trigger}
             </div>
         </>
-    )
-}
+    );
+};
