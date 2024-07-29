@@ -34,3 +34,6 @@ export const getFormattedTimestamp = (timestamp: number) => {
     return format(date, 'MMM');
   }
 };
+
+export const pluralize = (word: string, length: number) =>
+  length <= 1 ? word : `${word}s`;
