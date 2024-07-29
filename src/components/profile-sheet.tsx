@@ -12,6 +12,9 @@ import { Id } from '../../convex/_generated/dataModel';
 import { ChatTypeContent } from './chat-type-content';
 import { pluralize } from '@/lib/utils';
 import Link from 'next/link';
+import { useMutationHandler } from '@/hooks/use-mutation-handler';
+import { ConvexError } from 'convex/values';
+import { toast } from 'sonner';
 
 
 type ActionButtonProps = {
@@ -60,6 +63,19 @@ const ProfileSheet = ({
     id: chatId as Id<"conversations">
   })
 
+  const { mutate: blockContact, state: blockContactState } = useMutationHandler(api.contact.block)
+
+  const blockContactHandler = async () => {
+    try {
+      await blockContact({
+        conversationId: chatId
+      });
+      toast.success("Contact Blocked successfully")
+    } catch (error) {
+      error instanceof ConvexError ? error.data : "An error occurred while processing contact information"
+    }
+  }
+
   const chatFiles = messages?.filter(({ type }) => type !== 'text');
 
   return (
@@ -97,10 +113,10 @@ const ProfileSheet = ({
             </DialogTitle>
           </DialogHeader>
           <div className='flex items-center space-x-3'>
-            <Button>
+            <Button onClick={() => setBlockConfirmationDialog(false)} variant={"link"} disabled={blockContactState === "loading"}>
               Cancel
             </Button>
-            <Button variant={"destructive"}>
+            <Button variant={"destructive"} disabled={blockContactState === "loading"} onClick={blockContactHandler}>
               Block
             </Button>
           </div>
