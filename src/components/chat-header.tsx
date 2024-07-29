@@ -12,6 +12,7 @@ import { ChevronLeft, Phone, Video } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import ProfileSheet from './profile-sheet';
+import GroupSheet from './group-sheet';
 
 type props = {
     chatAvatar: string,
@@ -53,7 +54,7 @@ const ChatHeader: FC<props> = ({
                         <h2 className='font-bold text-lg'>{username}</h2>
                     </SheetTrigger>
                     <SheetContent className='bg-white dark:bg-black dark:text-white w-80 md:w-96'>
-                        {isGroup ? <div>GroupCheet</div> : <ProfileSheet status={status} username={username} chatId={chatId} groupsInCommon={groupInCommon} chatAvatar={chatAvatar} />}
+                        <GroupSheet chatId={chatId} groupName={username} /> : <ProfileSheet status={status} username={username} chatId={chatId} groupsInCommon={groupInCommon} chatAvatar={chatAvatar} />
                     </SheetContent>
                 </Sheet>
             </div>
