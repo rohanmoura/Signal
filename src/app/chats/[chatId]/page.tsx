@@ -3,7 +3,7 @@ import { NavigationBar } from '@/components/navigation-bar';
 import { NewGroup } from '@/components/new-group';
 import React from 'react'
 import { Id } from '../../../../convex/_generated/dataModel';
-import ChatContent from '@/components/chat-content';
+import { ChatContent } from '@/components/chat-content';
 
 const page = ({
     params: { chatId }
