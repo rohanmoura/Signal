@@ -7,6 +7,7 @@ import { useUser } from '@clerk/clerk-react';
 import { useMutationHandler } from '@/hooks/use-mutation-handler';
 import MessageItem from './message-item';
 import ChatHeader from './chat-header';
+import ChatFooter from './chat-footer';
 
 export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({
     chatId,
@@ -92,6 +93,7 @@ export const ChatContent: FC<{ chatId: Id<'conversations'> }> = ({
                     />
                 ))}
             </div>
+            <ChatFooter chatId={chatId} currentUserId={user?.id!} />
         </div>
     );
 };
