@@ -30,7 +30,7 @@ const MessageItem: FC<MessageItemProps> = ({
 
     const formatTime = (timestamp: number) => format(timestamp, 'HH:mm');
     return (
-        <div className={cn("flex flex-col w-full mx-2", {
+        <div className={cn("flex items-end", {
             "justify-end": fromCurrentUser,
         })}>
             <div className={cn("flex flex-col w-full mx-2", {
@@ -109,3 +109,4 @@ const MessageItem: FC<MessageItemProps> = ({
 }
 
 export default MessageItem
+// a71vUIzsed3rUGGi

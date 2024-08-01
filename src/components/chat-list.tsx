@@ -5,7 +5,6 @@ import { api } from "../../convex/_generated/api";
 import CHatListItem from "./chat-list-item";
 
 type props = {
-
 }
 
 export const ChatList: FC<props> = () => {
