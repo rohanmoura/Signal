@@ -68,9 +68,7 @@ This course is divided into multiple modules, each covering different aspects of
 
 Make sure to properly configure your environment variables by referring to the `.env.example` file. This file contains example values and instructions on what needs to be filled in.
 
-## Course Video
 
-Watch the full course on YouTube: [Fullstack Signal Clone: Next.js 15, Convex, Supabase Storage, Clerk, Zustand, Vercel](https://www.youtube.com/watch?v=kzmxtSOTYus)
 
 ## Contributing
 
