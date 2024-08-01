@@ -1,7 +1,7 @@
 import { useMutationHandler } from '@/hooks/use-mutation-handler';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ConvexError } from 'convex/values';
-import React, { ChangeEvent, FC, useState } from 'react'
+import React, { ChangeEvent, FC, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -24,7 +24,9 @@ import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
 import { Button } from './ui/button';
 import { v4 as uuid } from "uuid";
 import { supabaseBrowserClient } from '@/supabase/supabaseClient';
-import { AudioRecorder } from "react-audio-voice-recorder"
+import { AudioRecorder } from "react-audio-voice-recorder";
+import Pusher from "pusher-js";
+import axios from "axios";
 
 type props = {
     chatId: string;
@@ -63,6 +65,28 @@ const ChatFooter: FC<props> = ({
         }
     })
 
+    useEffect(() => {
+        const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+            cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+        });
+
+        const channel = pusher.subscribe(chatId);
+
+        channel.bind("typing", (
+            data: {
+                isTyping: boolean,
+                userId: string
+            }
+        ) => {
+            if (data.userId !== currentUserId) {
+                setIsTyping(data.isTyping);
+            }
+        });
+        return () => {
+            pusher.unsubscribe(chatId);
+        }
+    }, [chatId, currentUserId])
+
     const createMessagehandler = async ({
         content,
     }: z.infer<typeof ChatMessageSchema>) => {
@@ -86,6 +110,22 @@ const ChatFooter: FC<props> = ({
         if (selectionStart !== null) {
             form.setValue("content", value)
         }
+        if (!typing) {
+            setTyping(true);
+            await axios.post('/api/type-indicator', {
+                channel: chatId,
+                event: "typing",
+                data: { isTyping: true, userid: currentUserId },
+            });
+            setTimeout(() => {
+                setTyping(false);
+                axios.post('/api/type-indicator', {
+                    channel: chatId,
+                    event: "typing",
+                    data: { isTyping: false, userid: currentUserId },
+                });
+            }, 2000)
+        };
     }
 
     const handleImageUpload = async () => {
@@ -198,7 +238,7 @@ const ChatFooter: FC<props> = ({
                                 }
                             }} rows={1} maxRows={2} {...field} disabled={createMessageState === "loading"} placeholder='Type a message' onChange={handleInputChange} className='flex-grow bg-gray-200 dark:bg-gray-600 rounded-2xl resize-none px-4 p-2 ring-0 focus:ring-0 focus:outline-none outline-none'
                             />
-                            <>typing...</>
+                            {isTyping && <p className='text-xs ml-1'>typing...</p>}
                         </>
                     </FormControl>
                 )} />
