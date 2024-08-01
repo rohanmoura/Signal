@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import ProfileSheet from './profile-sheet';
 import GroupSheet from './group-sheet';
+import { useRouter } from 'next/navigation';
 
 type props = {
     chatAvatar: string,
@@ -32,6 +33,10 @@ const ChatHeader: FC<props> = ({
     const groupInCommon = conversations?.filter(
         ({ conversation }) => conversation.isGroup
     )
+    const router = useRouter()
+    const videocall = () => {
+        router.push(`/calls/${chatId}`);
+    }
 
     return (
         <div className={cn('fixed bg-white dark:bg-gray-800 px-3 md:pr-10 flex items-center justify-between space-x-3 z-30 top-0 w-full h-20')} style={isDesktop ? { width: `calc(100% - ${sidebarWidth + 3}%)` } : {}}>
@@ -59,8 +64,8 @@ const ChatHeader: FC<props> = ({
                 </Sheet>
             </div>
             <div className='flex items-center space-x-4'>
-                <Video className='cursor-pointer' />
-                <Phone className='cursor-pointer' />
+                <Video className='cursor-pointer' onClick={videocall} />
+                <Phone className='cursor-pointer' onClick={videocall} />
             </div>
         </div>
     )
